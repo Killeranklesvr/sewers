@@ -2,70 +2,72 @@ local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
    Name = "Killer Hub | The Sewers",
-   Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
+   Icon = 0,
    LoadingTitle = "Killer Hub",
    LoadingSubtitle = "by gou9907 on discord",
-   ShowText = "Killer Hub", -- for mobile users to unhide rayfield, change if you'd like
-   Theme = "Default", -- Check https://docs.sirius.menu/rayfield/configuration/themes
-
-   ToggleUIKeybind = "K", -- The keybind to toggle the UI visibility (string like "K" or Enum.KeyCode)
+   ShowText = "Killer Hub",
+   Theme = "Default",
+   ToggleUIKeybind = "K",
 
    DisableRayfieldPrompts = false,
-   DisableBuildWarnings = false, -- Prevents Rayfield from warning when the script has a version mismatch with the interface
+   DisableBuildWarnings = false,
 
    ConfigurationSaving = {
       Enabled = true,
-      FolderName = nil, -- Create a custom folder for your hub/game
+      FolderName = nil,
       FileName = "Big Hub"
    },
 
    Discord = {
-      Enabled = true, -- Prompt the user to join your Discord server if their executor supports it
-      Invite = "TxvFuct5F2", -- The Discord invite code, do not include discord.gg/. E.g. discord.gg/ ABCD would be ABCD
-      RememberJoins = true -- Set this to false to make them join the discord every time they load it up
+      Enabled = true,
+      Invite = "TxvFuct5F2",
+      RememberJoins = true
    },
 
-   KeySystem = true, -- Set this to true to use our key system
+   KeySystem = true,
    KeySettings = {
       Title = "Killer Hub Key System",
       Subtitle = "Key System Get The Key From The Discord",
-      Note = "Join our discord for the key. https://discord.gg/TxvFuct5F2", -- Use this to tell the user how to get a key
-      FileName = "KeyThatIsSigmaTbh", -- It is recommended to use something unique as other scripts using Rayfield may overwrite your key file
-      SaveKey = true, -- The user's key will be saved, but if you change the key, they will be unable to use your script
-      GrabKeyFromSite = false, -- If this is true, set Key below to the RAW site you would like Rayfield to get the key from
-      Key = {"erytiubnfdssdfrl"} -- List of keys that will be accepted by the system, can be RAW file links (pastebin, github etc) or simple strings ("hello","key22")
+      Note = "Join our discord for the key. https://discord.gg/TxvFuct5F2",
+      FileName = "KeyThatIsSigmaTbh",
+      SaveKey = true,
+      GrabKeyFromSite = false,
+      Key = {"erytiubnfdssdfrl"}
    }
 })
 
-local AutoFarmTab = Window:CreateTab("Player", 4483362458) -- Title, Image
+local AutoFarmTab = Window:CreateTab("Player", 4483362458)
+
+local gearCollectorRunning = false
+local gearCollectorConnection
 
 local Toggle = AutoFarmTab:CreateToggle({
    Name = "AutoFarm Gears",
    CurrentValue = false,
    Flag = "Toggle1",
    Callback = function(Value)
-    -- Auto Gear Collection Script
-local player = game.Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local collectionRadius = 100000 -- Adjust the radius as needed
+      local player = game.Players.LocalPlayer
+      local character = player.Character or player.CharacterAdded:Wait()
+      local collectionRadius = 100000
 
--- Function to collect gears
-local function collectGears()
-    for _, gear in pairs(workspace:GetChildren()) do
-        if gear:IsA("Part") and gear.Name == "Gear" then
-            local distance = (character.HumanoidRootPart.Position - gear.Position).Magnitude
-            if distance <= collectionRadius then
-                gear.CFrame = character.HumanoidRootPart.CFrame -- Move gear to player
-                print("Collected gear:", gear.Name)
+      gearCollectorRunning = Value
+
+      if Value then
+         gearCollectorConnection = game:GetService("RunService").RenderStepped:Connect(function()
+            for _, gear in pairs(workspace:GetChildren()) do
+               if gear:IsA("Part") and gear.Name == "Gear" and character and character:FindFirstChild("HumanoidRootPart") then
+                  local distance = (character.HumanoidRootPart.Position - gear.Position).Magnitude
+                  if distance <= collectionRadius then
+                     gear.CFrame = character.HumanoidRootPart.CFrame
+                  end
+               end
             end
-        end
-    end
-end
-
--- Run the collection function periodically
-while true do
-    collectGears()
-    wait(1) -- Adjust the interval as needed
-        end
+         end)
+      else
+         if gearCollectorConnection then
+            gearCollectorConnection:Disconnect()
+            gearCollectorConnection = nil
+         end
+      end
    end,
 })
