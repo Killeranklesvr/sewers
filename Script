@@ -34,11 +34,42 @@ local Window = Rayfield:CreateWindow({
 
 local AutoFarmTab = Window:CreateTab("Player", 4483362458) -- Title, Image
 
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local player = Players.LocalPlayer
+
+local gearCollectorConnection
+
 local Toggle = AutoFarmTab:CreateToggle({
    Name = "AutoFarm Gears",
    CurrentValue = false,
    Flag = "Toggle1",
    Callback = function(Value)
+      if Value then
+         -- Enable AutoFarm
+         gearCollectorConnection = RunService.RenderStepped:Connect(function()
+            local character = player.Character
+            if not character then return end
 
+            local hrp = character:FindFirstChild("HumanoidRootPart")
+            if not hrp then return end
+
+            for _, gear in pairs(workspace:GetChildren()) do
+               if gear:IsA("Part") and gear.Name == "Gear" then
+                  local distance = (hrp.Position - gear.Position).Magnitude
+                  if distance <= 100 then -- Pickup range
+                     gear.CFrame = hrp.CFrame
+                     -- Optional: print("Collected gear:", gear.Name)
+                  end
+               end
+            end
+         end)
+      else
+         -- Disable AutoFarm
+         if gearCollectorConnection then
+            gearCollectorConnection:Disconnect()
+            gearCollectorConnection = nil
+         end
+      end
    end,
 })
